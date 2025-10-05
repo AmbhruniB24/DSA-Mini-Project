@@ -1,0 +1,129 @@
+#include <stdio.h>
+
+#define SIZE 9   // Max moves in Tic Tac Toe
+
+// Stack to store moves
+struct Stack {
+    int top;
+    int row[SIZE];
+    int col[SIZE];
+} moveStack;
+
+// Initialize board
+char board[3][3];
+
+// Function prototypes
+void initializeBoard();
+void displayBoard();
+int checkWinner();
+void push(int r, int c);
+void pop(int *r, int *c);
+
+int main() {
+    int player = 1, choice, row, col, winner = 0;
+    moveStack.top = -1;
+    initializeBoard();
+
+    printf("=== TIC TAC TOE using STACK ===\n");
+    displayBoard();
+
+    for (int i = 0; i < SIZE && !winner; ) {
+        printf("Player %d, enter position (1-9) or 0 to Undo: ", player);
+        scanf("%d", &choice);
+
+        if (choice == 0) {
+            if (moveStack.top == -1)
+                printf("No moves to undo!\n");
+            else {
+                pop(&row, &col);
+                board[row][col] = ' ';
+                i--;
+                player = (player == 1) ? 2 : 1; // Switch back player
+            }
+            displayBoard();
+            continue;
+        }
+
+        if (choice < 1 || choice > 9) {
+            printf("Invalid position! Try again.\n");
+            continue;
+        }
+
+        row = (choice - 1) / 3;
+        col = (choice - 1) % 3;
+
+        if (board[row][col] == ' ') {
+            board[row][col] = (player == 1) ? 'X' : 'O';
+            push(row, col);
+            i++;
+            displayBoard();
+            winner = checkWinner();
+            player = (player == 1) ? 2 : 1;
+        } else {
+            printf("Position already taken! Try again.\n");
+        }
+    }
+
+    if (winner)
+        printf("🎉 Player %d wins!\n", (player == 1) ? 2 : 1);
+    else
+        printf("It's a draw!\n");
+
+    return 0;
+}
+
+void initializeBoard() {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            board[i][j] = ' ';
+}
+
+void displayBoard() {
+    printf("\n");
+    for (int i = 0; i < 3; i++) {
+        printf(" %c | %c | %c \n", board[i][0], board[i][1], board[i][2]);
+        if (i < 2) printf("---|---|---\n");
+    }
+    printf("\n");
+}
+
+int checkWinner() {
+    for (int i = 0; i < 3; i++) {
+        if (board[i][0] != ' ' &&
+            board[i][0] == board[i][1] &&
+            board[i][1] == board[i][2])
+            return 1;
+        if (board[0][i] != ' ' &&
+            board[0][i] == board[1][i] &&
+            board[1][i] == board[2][i])
+            return 1;
+    }
+
+    if (board[0][0] != ' ' &&
+        board[0][0] == board[1][1] &&
+        board[1][1] == board[2][2])
+        return 1;
+
+    if (board[0][2] != ' ' &&
+        board[0][2] == board[1][1] &&
+        board[1][1] == board[2][0])
+        return 1;
+
+    return 0;
+}
+
+void push(int r, int c) {
+    if (moveStack.top < SIZE - 1) {
+        moveStack.top++;
+        moveStack.row[moveStack.top] = r;
+        moveStack.col[moveStack.top] = c;
+    }
+}
+
+void pop(int *r, int *c) {
+    if (moveStack.top >= 0) {
+        *r = moveStack.row[moveStack.top];
+        *c = moveStack.col[moveStack.top];
+        moveStack.top--;
+    }
+}
